@@ -1,21 +1,39 @@
 public class Solution {
     public boolean isMatch(String s, String p) {
-        int sLen = s.length();
-        int pLen = p.length();
-        boolean[][] dp = new boolean[sLen + 1][pLen + 1];
-        dp[sLen][pLen] = true;
-        
-        for (int i = sLen; i >= 0; i--) {
-            for (int j = pLen - 1; j >= 0; j--) {
-                boolean match = (i < sLen && (p.charAt(j) == s.charAt(i) || p.charAt(j) == '?'));
-                if (p.charAt(j) == '*') {
-                    dp[i][j] = dp[i][j + 1] || (i < sLen && dp[i + 1][j]);
-                } else {
-                    dp[i][j] = match && dp[i + 1][j + 1];
-                }
+        int i = 0, j = 0;
+        int starIdx = -1;
+        int matchIdx = 0;
+
+        while (i < s.length()) {
+            // Match character or '?'
+            if (j < p.length() &&
+                (p.charAt(j) == s.charAt(i) || p.charAt(j) == '?')) {
+                i++;
+                j++;
+            }
+            // Found '*'
+            else if (j < p.length() && p.charAt(j) == '*') {
+                starIdx = j;
+                matchIdx = i;
+                j++;
+            }
+            // Mismatch but previous '*' exists → backtrack
+            else if (starIdx != -1) {
+                j = starIdx + 1;
+                matchIdx++;
+                i = matchIdx;
+            }
+            // No match and no '*'
+            else {
+                return false;
             }
         }
-        
-        return dp[0][0];
+
+        // Remaining pattern must be all '*'
+        while (j < p.length() && p.charAt(j) == '*') {
+            j++;
+        }
+
+        return j == p.length();
     }
 }
