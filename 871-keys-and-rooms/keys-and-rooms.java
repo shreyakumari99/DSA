@@ -9,6 +9,14 @@ class Solution {
         }
         return true;
     }
+
+    public void dfs(int start, List<List<Integer>> rooms, boolean[] visited){
+        visited[start] = true;
+        for(int ele : rooms.get(start)){
+            if(!visited[ele]) dfs(ele,rooms,visited);
+        }
+    }
+
     public void bfs(int start, List<List<Integer>> rooms, boolean[] visited){
         Queue<Integer> q = new LinkedList<>();
         q.add(start);
