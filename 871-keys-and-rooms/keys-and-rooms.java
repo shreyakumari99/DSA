@@ -3,7 +3,7 @@ class Solution {
         int n = rooms.size();
         boolean[] visited = new boolean[n];
         visited[0] = true;
-        bfs(0,rooms,visited);
+        dfs(0,rooms,visited);
         for(boolean ele : visited){
             if(ele==false) return false;
         }
