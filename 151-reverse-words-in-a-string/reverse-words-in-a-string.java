@@ -1,12 +1,7 @@
-public class Solution {
+class Solution {
     public String reverseWords(String s) {
-        // Remove leading and trailing spaces
-        s = s.trim();
-
-        // Split the string into words
-        String[] words = s.split("\\s+");
-
-        // Reverse the words array
+        s = s.trim(); // Remove leading and trailing spaces
+        String[] words = s.split("\\s+"); // Split into words
         int left = 0, right = words.length - 1;
         while (left < right) {
             String temp = words[left];
@@ -15,8 +10,6 @@ public class Solution {
             left++;
             right--;
         }
-
-        // Join the words with a single space
-        return String.join(" ", words);
+        return String.join(" ", words); // Join words in reverse order
     }
 }
