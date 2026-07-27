@@ -3,55 +3,59 @@ import java.util.*;
 class Solution {
     public List<Integer> findSubstring(String s, String[] words) {
         List<Integer> result = new ArrayList<>();
-        if (s == null || words == null || words.length == 0) {
+        if (s == null || s.length() == 0 || words == null || words.length == 0) {
             return result;
         }
 
-        int n = s.length();
-        int wordCount = words.length;
         int wordLen = words[0].length();
-        int totalLen = wordCount * wordLen;
+        int wordCount = words.length;
+        int totalLen = wordLen * wordCount;
 
-        // Map to store the frequency of each word in the input array
-        Map<String, Integer> counts = new HashMap<>();
-        for (String word : words) {
-            counts.put(word, counts.getOrDefault(word, 0) + 1);
+        if (s.length() < totalLen) {
+            return result;
         }
 
-        // Iterate through the word length to cover all possible alignments
+        // Build frequency map for words
+        Map<String, Integer> wordMap = new HashMap<>();
+        for (String word : words) {
+            wordMap.put(word, wordMap.getOrDefault(word, 0) + 1);
+        }
+
+        // Run sliding window for each offset from 0 to wordLen - 1
         for (int i = 0; i < wordLen; i++) {
-            int left = i, right = i, count = 0;
-            Map<String, Integer> windowMap = new HashMap<>();
+            int left = i;
+            int count = 0;
+            Map<String, Integer> currentMap = new HashMap<>();
 
-            while (right + wordLen <= n) {
-                // Extract the word at the right end of the window
-                String word = s.substring(right, right + wordLen);
-                right += wordLen;
+            for (int right = i; right <= s.length() - wordLen; right += wordLen) {
+                String sub = s.substring(right, right + wordLen);
 
-                if (counts.containsKey(word)) {
-                    windowMap.put(word, windowMap.getOrDefault(word, 0) + 1);
+                // If word is in our target word map
+                if (wordMap.containsKey(sub)) {
+                    currentMap.put(sub, currentMap.getOrDefault(sub, 0) + 1);
                     count++;
 
-                    // If we have more of 'word' than required, shrink from the left
-                    while (windowMap.get(word) > counts.get(word)) {
+                    // If word frequency exceeds target frequency, slide 'left' pointer
+                    while (currentMap.get(sub) > wordMap.get(sub)) {
                         String leftWord = s.substring(left, left + wordLen);
-                        windowMap.put(leftWord, windowMap.get(leftWord) - 1);
+                        currentMap.put(leftWord, currentMap.get(leftWord) - 1);
                         count--;
                         left += wordLen;
                     }
 
-                    // If the number of words matches, we found a valid index
+                    // If current window contains all words matching frequency
                     if (count == wordCount) {
                         result.add(left);
                     }
                 } else {
-                    // Not a valid word, reset the window
-                    windowMap.clear();
+                    // Reset window if invalid word encountered
+                    currentMap.clear();
                     count = 0;
-                    left = right;
+                    left = right + wordLen;
                 }
             }
         }
+
         return result;
     }
 }
