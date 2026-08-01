@@ -1,49 +1,64 @@
-import java.util.*;
-
-public class Solution {
+class Solution {
     public String minWindow(String s, String t) {
-        if (s.length() < t.length()) {
+        if (s == null || t == null || s.length() < t.length()) {
             return "";
         }
 
-        Map<Character, Integer> tCount = new HashMap<>();
+        // Frequency map for target string t
+        int[] targetCount = new int[128];
         for (char c : t.toCharArray()) {
-            tCount.put(c, tCount.getOrDefault(c, 0) + 1);
+            targetCount[c]++;
         }
 
-        int requiredChars = tCount.size();
-        int formedChars = 0;
+        // Frequency map for current window
+        int[] windowCount = new int[128];
+        
+        int requiredUniqueChars = 0;
+        for (int count : targetCount) {
+            if (count > 0) {
+                requiredUniqueChars++;
+            }
+        }
 
-        Map<Character, Integer> windowCounts = new HashMap<>();
-        int[] ans = {-1, 0, 0}; // {window length, start, end}
+        int formedUniqueChars = 0;
+        int left = 0, right = 0;
+        
+        // Track the smallest valid substring: {windowLength, startIdx}
+        int minLen = Integer.MAX_VALUE;
+        int minStart = 0;
 
-        int left = 0;
-        for (int right = 0; right < s.length(); right++) {
-            char c = s.charAt(right);
-            windowCounts.put(c, windowCounts.getOrDefault(c, 0) + 1);
+        while (right < s.length()) {
+            // Expand the window
+            char rightChar = s.charAt(right);
+            windowCount[rightChar]++;
 
-            if (tCount.containsKey(c) && windowCounts.get(c).equals(tCount.get(c))) {
-                formedChars++;
+            // Check if current character completes the count for this character
+            if (targetCount[rightChar] > 0 && windowCount[rightChar] == targetCount[rightChar]) {
+                formedUniqueChars++;
             }
 
-            while (left <= right && formedChars == requiredChars) {
-                c = s.charAt(left);
-
-                if (ans[0] == -1 || right - left + 1 < ans[0]) {
-                    ans[0] = right - left + 1;
-                    ans[1] = left;
-                    ans[2] = right;
+            // Shrink the window from the left as long as it remains valid
+            while (left <= right && formedUniqueChars == requiredUniqueChars) {
+                // Update minimum length found so far
+                if (right - left + 1 < minLen) {
+                    minLen = right - left + 1;
+                    minStart = left;
                 }
 
-                windowCounts.put(c, windowCounts.get(c) - 1);
-                if (tCount.containsKey(c) && windowCounts.get(c) < tCount.get(c)) {
-                    formedChars--;
+                // Remove the left character from window
+                char leftChar = s.charAt(left);
+                windowCount[leftChar]--;
+
+                if (targetCount[leftChar] > 0 && windowCount[leftChar] < targetCount[leftChar]) {
+                    formedUniqueChars--;
                 }
 
                 left++;
             }
+
+            right++;
         }
 
-        return ans[0] == -1 ? "" : s.substring(ans[1], ans[2] + 1);
+        return minLen == Integer.MAX_VALUE ? "" : s.substring(minStart, minStart + minLen);
     }
-}    
+}
